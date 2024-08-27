@@ -1,0 +1,3 @@
+groq key:
+    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
+export GROQ_API_KEY=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
