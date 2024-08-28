@@ -15,8 +15,7 @@ db.once('open', function () {
 const app = express();
 const PORT = 4000;
 // make sure to do: export GROQ_API_KEY=<api-key>
-//const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-const groq = new Groq({ apiKey: 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 });
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 app.use(cors());
 app.use(bodyParser.json());
