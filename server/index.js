@@ -3,6 +3,14 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const axios = require('axios');
 const Groq = require("groq-sdk");
+const mongoose = require('mongoose');
+
+mongoose.connect(`mongodb+srv://ItayBiton:itay1234@atlascluster.dgff8bz.mongodb.net/AI_Vacation`)
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function () {
+    console.log("Connection Successful!");
+});
 
 const app = express();
 const PORT = 4000;
@@ -17,7 +25,9 @@ app.listen(PORT, () => {
 });
 
 /*
+ * 
  * Routing for the server
+ * 
  */
 
 app.get('/', (req, res) => {
@@ -25,7 +35,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/generate-image', async (req, res) => {
-    const { country } = req.query;
+    const { country, tripId } = req.query;
 
     try {
         const imageId = await generateImage(country);
@@ -49,6 +59,7 @@ app.get('/generate-image', async (req, res) => {
                         await new Promise((resolve) => setTimeout(resolve, 3000));
                     }
                 }
+                updateTripWithImage(tripId, imageUrl)
                 res.write(`data: ${JSON.stringify({ imageUrl })}\n\n`);
                 res.end();
             }
@@ -65,9 +76,20 @@ app.post('/generate-route', async (req, res) => {
     const { country, travelType } = req.body;
   
     try {
+        let id = 0
         const routeData = await getRoute(country, travelType);
-        console.log(routeData)
-        res.json(routeData);
+        const Trip = mongoose.model('Trip', mongooseTripSchema, 'Trips');
+        await new Trip(routeData).save()
+            .then(trip => {
+                console.log("Trip to "+ trip.Country + " saved to Trips collection.")
+                id = trip._id
+            })
+            .catch(err => console.error(err));
+        const responseData = {
+            tripId: id,
+            ...routeData
+        };
+        res.json(responseData);
     } catch (error) {
         console.error('Error generating route:', error.message);
         res.status(500).json({ error: 'Failed to generate route' });
@@ -76,7 +98,9 @@ app.post('/generate-route', async (req, res) => {
 
 
 /*
+ * 
  *  Image generation part using stablehorde api
+ * 
  */
 
 async function generateImage(country) {
@@ -126,7 +150,7 @@ async function getImageStatus(imageId) {
 
     try {
         const response = await axios.get(statusUrl);
-        if (response.data.done && response.data.finished > 0) {
+        if (response.data.done) {
             return response.data.generations[0].img;
         }
         return null;
@@ -153,7 +177,9 @@ async function checkImageStatus(imageId) {
 }
 
 /*
+ * 
  *  AI route generation part using the groq cloud api
+ * 
  */
 
 
@@ -186,6 +212,32 @@ Maximize the number of waypoints while respecting the travel constraints. Ensure
     });
     return JSON.parse(chatCompletion.choices[0].message.content);
 }
+
+/*
+ * 
+ * Mongo helper functions 
+ * 
+ */
+
+const updateTripWithImage = async (tripId, imageUrl) => {
+    try {
+        const Trip = mongoose.model('Trip', mongooseTripSchema, 'Trips');
+        await Trip.findByIdAndUpdate(
+            tripId, 
+            { imageUrl: imageUrl },
+            { new: true } 
+        );
+        console.log("Updated trip with image");
+    } catch (err) {
+        console.error("Error updating trip with image:", err);
+    }
+};
+
+/*
+ * 
+ *  Data schemas:
+ * 
+ */
 
 const routeSchema = {
     Country: { type: "string" },
@@ -240,3 +292,38 @@ const routeSchema = {
         dayRecap: { type:"string" }
     }
 }
+
+// Sub-schema for Waypoints
+const waypointSchema = new mongoose.Schema({
+    name: { type: String },
+    hasTrek: { type: Boolean },
+    trekDetails: { type: String },
+    information: { type: String },
+    position: {
+        type: [Number],
+        validate: [arrayLimit, 'Position array should have exactly 2 numbers']
+    }
+});
+
+// Custom validation function for the position array
+function arrayLimit(val) {
+    return val.length === 2;
+}
+
+// Sub-schema for a Day
+const daySchema = new mongoose.Schema({
+    waypoints: [waypointSchema],
+    dailyDistance: { type: Number },
+    dayRecap: { type: String }
+});
+
+// Main Schema for the Route
+const mongooseTripSchema = new mongoose.Schema({
+    Country: { type: String },
+    travelType: { type: String },
+    TotalDistance: { type: Number },
+    imageUrl: { type: String },
+    Day1: daySchema,
+    Day2: daySchema,
+    Day3: daySchema
+});

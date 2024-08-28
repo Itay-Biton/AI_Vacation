@@ -10,7 +10,7 @@ function App() {
     const [waypoints1, setWaypoints1] = useState([]);
     const [waypoints2, setWaypoints2] = useState([]);
     const [waypoints3, setWaypoints3] = useState([]);
-    const [tripDetails, setTripDetails] = useState(null); // State to hold trip details
+    const [tripDetails, setTripDetails] = useState(null); 
     const [waitTime, setWaitTime] = useState(null);
 
     const handleSubmit = async (event) => {
@@ -27,16 +27,16 @@ function App() {
               },
               body: JSON.stringify({ country, travelType }),
             });
-        
+
             const routeData = await response.json();
-            console.log(routeData)
-            setTripDetails(routeData); // Store entire trip details
+
+            setTripDetails(routeData); 
             setWaypoints1(routeData.Day1.waypoints); 
             setWaypoints2(routeData.Day2.waypoints); 
             setWaypoints3(routeData.Day3.waypoints); 
 
             // Start image generation with SSE
-            const eventSource = new EventSource(`http://localhost:4000/generate-image?country=${encodeURIComponent(country)}`);
+            const eventSource = new EventSource(`http://localhost:4000/generate-image?country=${encodeURIComponent(country)}&tripId=${encodeURIComponent(routeData.tripId)}`);
 
             eventSource.onmessage = (event) => {
                 const data = JSON.parse(event.data);
