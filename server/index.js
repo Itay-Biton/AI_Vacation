@@ -48,14 +48,14 @@ app.get('/generate-image', async (req, res) => {
             waitTime = await checkImageStatus(imageId)
             if (waitTime > 0) {
                 res.write(`data: ${JSON.stringify({ waitTime })}\n\n`);
-                setTimeout(sendUpdate, 2000); // Send update every 5 seconds
+                setTimeout(sendUpdate, 2000); 
             } else {
                 let imageUrl = null;
                 while (!imageUrl) {
                     imageUrl = await getImageStatus(imageId);
                     if (!imageUrl) {
                         console.log('Waiting for image to be transferred...');
-                        await new Promise((resolve) => setTimeout(resolve, 3000));
+                        await new Promise((resolve) => setTimeout(resolve, 5000));
                     }
                 }
                 updateTripWithImage(tripId, imageUrl)
@@ -133,7 +133,7 @@ async function generateImage(country) {
         );
 
         if (!response.data.id) {
-        throw new Error('Invalid response from StableHorde API');
+            throw new Error('Invalid response from StableHorde API');
         }
 
         // Returning the job ID to check the status
