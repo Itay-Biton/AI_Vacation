@@ -13,16 +13,15 @@ db.once('open', function () {
 });
 
 const app = express();
-const PORT = 4000;
 // make sure to do: export GROQ_API_KEY=<api-key>
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 app.use(cors());
 app.use(bodyParser.json());
 
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
+const PORT = process.env.PORT || 4000;
+
+app.listen(PORT, () => {});
 
 /*
  * 
