@@ -33,6 +33,13 @@ app.get('/', (req, res) => {
   res.send('Express server is running');
 });
 
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'OK',
+        message: 'Server is healthy'
+    });
+});
+
 app.get('/generate-image', async (req, res) => {
     const { country, tripId } = req.query;
 
