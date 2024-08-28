@@ -20,7 +20,7 @@ function App() {
 
         try {
             // Fetch route data
-            const response = await fetch('http://localhost:4000/generate-route', {
+            const response = await fetch('https://naval-felisha-itay-706c7221.koyeb.app/:8000/generate-route', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -36,7 +36,7 @@ function App() {
             setWaypoints3(routeData.Day3.waypoints); 
 
             // Start image generation with SSE
-            const eventSource = new EventSource(`http://localhost:4000/generate-image?country=${encodeURIComponent(country)}&tripId=${encodeURIComponent(routeData.tripId)}`);
+            const eventSource = new EventSource(`https://naval-felisha-itay-706c7221.koyeb.app/:8000/generate-image?country=${encodeURIComponent(country)}&tripId=${encodeURIComponent(routeData.tripId)}`);
 
             eventSource.onmessage = (event) => {
                 const data = JSON.parse(event.data);
