@@ -24,44 +24,29 @@ app.get('/', (req, res) => {
   res.send('Express server is running');
 });
 
-app.post('/create-route', async (req, res) => {
-    const { country, travelType } = req.body;
-  
-    const waypoints = [
-      { name: 'City A', position: [51.505, -0.09] },
-      { name: 'City B', position: [51.515, -0.1] },
-      { name: 'City C', position: [51.525, -0.11] },
-    ];
-  
-    res.json({ 
-        message: `Generated route for ${country} by ${travelType}`, 
-        waypointsData: waypoints 
-    });
-  });
-
 app.get('/generate-image', async (req, res) => {
     const { country } = req.query;
 
     try {
         const imageId = await generateImage(country);
-
+        
         res.setHeader('Content-Type', 'text/event-stream');
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Connection', 'keep-alive');
 
         const sendUpdate = async () => {
             // Check image generation status
-            let waitTime = await checkImageStatus(imageId);
+            waitTime = await checkImageStatus(imageId)
             if (waitTime > 0) {
                 res.write(`data: ${JSON.stringify({ waitTime })}\n\n`);
-                setTimeout(sendUpdate, 5000); // Send update every 5 seconds
+                setTimeout(sendUpdate, 2000); // Send update every 5 seconds
             } else {
                 let imageUrl = null;
                 while (!imageUrl) {
                     imageUrl = await getImageStatus(imageId);
                     if (!imageUrl) {
                         console.log('Waiting for image to be transferred...');
-                        await new Promise((resolve) => setTimeout(resolve, 5000));
+                        await new Promise((resolve) => setTimeout(resolve, 3000));
                     }
                 }
                 res.write(`data: ${JSON.stringify({ imageUrl })}\n\n`);
@@ -81,6 +66,7 @@ app.post('/generate-route', async (req, res) => {
   
     try {
         const routeData = await getRoute(country, travelType);
+        console.log(routeData)
         res.json(routeData);
     } catch (error) {
         console.error('Error generating route:', error.message);
@@ -111,7 +97,7 @@ async function generateImage(country) {
             width: 512,
             seed_variation: 1,
             steps: 10,
-            },
+            }
         },
         {
             headers: {
@@ -140,7 +126,7 @@ async function getImageStatus(imageId) {
 
     try {
         const response = await axios.get(statusUrl);
-        if (response.data.done) {
+        if (response.data.done && response.data.finished > 0) {
             return response.data.generations[0].img;
         }
         return null;
@@ -157,7 +143,9 @@ async function checkImageStatus(imageId) {
         const response = await axios.get(statusUrl);
         if (response.data.done) 
             return 0
-        return response.data.wait_time;
+        else if (response.data.waiting > 0 && response.data.wait_time === 0)
+            return 1
+        return response.data.wait_time
     } catch (error) {
         console.error('Error checking image status:', error);
         throw error;
@@ -179,22 +167,36 @@ async function getRoute(country, travelType) {
         },
         {
             role: "user",
-            content: `Generate a route in ${country} using ${travelType}. Create 5 waypoints for stops with a distance under 80km between each one.`,
-        },
+            content: `Generate a detailed, three-day consecutive travel route through ${country} using a ${travelType}. The route should adhere to the following constraints:
+1) For bikes: maximum of 80 km per day.
+2) For cars: between 80 km and 300 km per day.
+3) Each day's route must begin where the previous day's route ended.
+Each day's route must include:
+- The total distance in kilometers.
+- Detailed waypoints, including name, position, and whether a trekking path is available.
+- Descriptive information for each waypoint, including 2-3 sentences about points of interest.
+- Information on any available trekking paths.
+Maximize the number of waypoints while respecting the travel constraints. Ensure each day's route is cohesive and logical, with a recap summarizing the day's travel experience. Provide as much detail as possible to make the route engaging and informative.`
+            },
         ],
         model: "llama3-8b-8192", 
         temperature: 0.5, 
         stream: false,
         response_format: { type: "json_object" },
     });
-    
     return JSON.parse(chatCompletion.choices[0].message.content);
 }
 
 const routeSchema = {
-    Route: {
+    Country: { type: "string" },
+    travelType: { type: "string" },
+    TotalDistance: { type: "number" },
+    Day1: {
         waypoints: {
             name: { type: "string" },
+            hasTrek: { type: "boolean" },
+            trekDetails: { type: "string" },
+            information: { type: "string" },
             position: {
                 type: "array",
                 items: { type: "number" },
@@ -202,9 +204,39 @@ const routeSchema = {
                 maxItems: 2,
             }
         },
-        description: { 
-            title: "Description", 
-            type: "string" 
+        dailyDistance: { type:"number"},
+        dayRecap: { type:"string" }
+    },
+    Day2: {
+        waypoints: {
+            name: { type: "string" },
+            hasTrek: { type: "boolean" },
+            trekDetails: { type: "string" },
+            information: { type: "string" },
+            position: {
+                type: "array",
+                items: { type: "number" },
+                minItems: 2,
+                maxItems: 2,
+            }
         },
+        dailyDistance: { type:"number" },
+        dayRecap: { type:"string" }
+    },
+    Day3: {
+        waypoints: {
+            name: { type: "string" },
+            hasTrek: { type: "boolean" },
+            trekDetails: { type: "string" },
+            information: { type: "string" },
+            position: {
+                type: "array",
+                items: { type: "number" },
+                minItems: 2,
+                maxItems: 2,
+            }
+        },
+        dailyDistance: { type:"number" },
+        dayRecap: { type:"string" }
     }
 }

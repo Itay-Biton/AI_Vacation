@@ -7,7 +7,10 @@ function App() {
     const [travelType, setTravelType] = useState('');
     const [loading, setLoading] = useState(false);
     const [imageUrl, setImageUrl] = useState('');
-    const [waypoints, setWaypoints] = useState([]);
+    const [waypoints1, setWaypoints1] = useState([]);
+    const [waypoints2, setWaypoints2] = useState([]);
+    const [waypoints3, setWaypoints3] = useState([]);
+    const [tripDetails, setTripDetails] = useState(null); // State to hold trip details
     const [waitTime, setWaitTime] = useState(null);
 
     const handleSubmit = async (event) => {
@@ -26,11 +29,13 @@ function App() {
             });
         
             const routeData = await response.json();
-            console.log(routeData.Route.waypoints)
-            setWaypoints(routeData.Route.waypoints); 
+            console.log(routeData)
+            setTripDetails(routeData); // Store entire trip details
+            setWaypoints1(routeData.Day1.waypoints); 
+            setWaypoints2(routeData.Day2.waypoints); 
+            setWaypoints3(routeData.Day3.waypoints); 
 
             // Start image generation with SSE
-            /*
             const eventSource = new EventSource(`http://localhost:4000/generate-image?country=${encodeURIComponent(country)}`);
 
             eventSource.onmessage = (event) => {
@@ -49,8 +54,7 @@ function App() {
                 setLoading(false);
                 eventSource.close();
             };
-            */
-
+            
         } catch (error) {
             console.error('Error fetching route data:', error);
             setLoading(false);
@@ -77,7 +81,7 @@ function App() {
                         onChange={(e) => setTravelType(e.target.value)}
                         className="form-input"
                     >
-                        <option value="">Select</option>
+                        <option value="" disabled>Select</option>
                         <option value="car">Car</option>
                         <option value="bike">Bike</option>
                     </select>
@@ -99,10 +103,74 @@ function App() {
                 </div>
             )}
 
-            {waypoints.length > 0 && (
+            {tripDetails && (
+                <div className="trip-details">
+                    <h2>3-Day Trip in {tripDetails.Country}</h2>
+                    <p><strong>Travel Type:</strong> {tripDetails.travelType}</p>
+                    <p><strong>Total Distance:</strong> {tripDetails.TotalDistance} km</p>
+
+                    <div className="day-recap">
+                        <h3>Day 1</h3>
+                        <p><strong>Daily Distance:</strong> {tripDetails.Day1.dailyDistance} km</p>
+                        <p>{tripDetails.Day1.dayRecap}</p>
+                        <ul>
+                            {tripDetails.Day1.waypoints.map((waypoint, index) => (
+                                <li key={index}>
+                                    <strong>{waypoint.name}:</strong> 
+                                    <p>{waypoint.information}</p>
+                                    {waypoint.hasTrek && (
+                                        <p><em>Trek available:</em> {waypoint.trekDetails}</p>
+                                    )}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    <div className="day-recap">
+                        <h3>Day 2</h3>
+                        <p><strong>Daily Distance:</strong> {tripDetails.Day2.dailyDistance} km</p>
+                        <p>{tripDetails.Day2.dayRecap}</p>
+                        <ul>
+                            {tripDetails.Day2.waypoints.map((waypoint, index) => (
+                                <li key={index}>
+                                    <strong>{waypoint.name}:</strong> 
+                                    <p>{waypoint.information}</p>
+                                    {waypoint.hasTrek && (
+                                        <p><em>Trek available:</em> {waypoint.trekDetails}</p>
+                                    )}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    <div className="day-recap">
+                        <h3>Day 3</h3>
+                        <p><strong>Daily Distance:</strong> {tripDetails.Day3.dailyDistance} km</p>
+                        <p>{tripDetails.Day3.dayRecap}</p>
+                        <ul>
+                            {tripDetails.Day3.waypoints.map((waypoint, index) => (
+                                <li key={index}>
+                                    <strong>{waypoint.name}:</strong>
+                                    <p>{waypoint.information}</p>
+                                    {waypoint.hasTrek && (
+                                        <p><em>Trek available:</em> {waypoint.trekDetails}</p>
+                                    )}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+            )}
+
+            {tripDetails !== null && waypoints1.length > 0 && waypoints2.length > 0 && waypoints3.length > 0 && (
                 <div className="map-container">
                     <h2>Travel Route:</h2>
-                    <MapComponent waypoints={waypoints} />
+                    <div className="map-legend">
+                        <span className="color-box" style={{ backgroundColor: 'blue' }}></span> Day One
+                        <span className="color-box" style={{ backgroundColor: 'green' }}></span> Day Two
+                        <span className="color-box" style={{ backgroundColor: 'red' }}></span> Day Three
+                    </div>
+                    <MapComponent waypoints1={waypoints1} waypoints2={waypoints2} waypoints3={waypoints3} />
                 </div>
             )}
         </div>
