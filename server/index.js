@@ -91,7 +91,6 @@ app.post('/generate-route', async (req, res) => {
                 id = trip._id
             })
             .catch(err => console.error(err));
-            console.log("4")
         const responseData = {
             tripId: id,
             ...routeData
@@ -335,6 +334,7 @@ const mongooseTripSchema = new mongoose.Schema({
     Country: { type: String },
     travelType: { type: String },
     TotalDistance: { type: Number },
+    defaultRoute: { type: Boolean },
     imageUrl: { type: String },
     Day1: daySchema,
     Day2: daySchema,
