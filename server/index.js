@@ -156,7 +156,7 @@ async function getImageStatus(imageId) {
 
     try {
         const response = await axios.get(statusUrl);
-        if (response.data.done) {
+        if (response.data.done && response.data.generations[0].img) {
             return response.data.generations[0].img;
         }
         return null;
