@@ -83,11 +83,8 @@ app.post('/generate-route', async (req, res) => {
   
     try {
         let id = 0
-        console.log("1")
         const routeData = await getRoute(country, travelType);
-        console.log("2")
         const Trip = mongoose.model('Trip', mongooseTripSchema, 'Trips');
-        console.log("3")
         await new Trip(routeData).save()
             .then(trip => {
                 console.log("Trip to "+ trip.Country + " saved to Trips collection.")
