@@ -20,15 +20,12 @@ const RoutingControl = ({ waypoints1, waypoints2, waypoints3 }) => {
 
   useEffect(() => {
     if (map !== null) {
-      if (waypoints1 && waypoints1.length > 1) {
+      if (waypoints1 && waypoints1.length > 1) 
         createRoute(waypoints1, 1);
-      }
-      if (waypoints2 && waypoints2.length > 1) {
+      if (waypoints2 && waypoints2.length > 1) 
         createRoute(waypoints2, 2);
-      }
-      if (waypoints3 && waypoints3.length > 1) {
+      if (waypoints3 && waypoints3.length > 1) 
         createRoute(waypoints3, 3);
-      }
     }
   }, [waypoints1, waypoints2, waypoints3, map]);
 
@@ -64,7 +61,6 @@ const RoutingControl = ({ waypoints1, waypoints2, waypoints3 }) => {
 };
 
 const MapComponent = ({ waypoints1, waypoints2, waypoints3 }) => {
-  // Center map on the first waypoint
   const center = waypoints1.length ? waypoints1[0].position : [51.505, -0.09];
 
   return (

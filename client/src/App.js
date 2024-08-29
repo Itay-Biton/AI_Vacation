@@ -35,7 +35,7 @@ function App() {
             setWaypoints2(routeData.Day2.waypoints); 
             setWaypoints3(routeData.Day3.waypoints); 
 
-            // Start image generation with SSE
+            // Start image generation 
             const eventSource = new EventSource(`https://husky-janna-itay-d1621afb.koyeb.app/generate-image?country=${encodeURIComponent(country)}&tripId=${encodeURIComponent(routeData.tripId)}`);
 
             eventSource.onmessage = (event) => {
