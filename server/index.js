@@ -211,7 +211,7 @@ async function getRoute(country, travelType) {
     - Descriptive information for each waypoint, including 2-3 sentences about points of interest.
     - Information on any available trekking paths.
     Maximize the number of waypoints while respecting the travel constraints. Ensure each day's route is cohesive and logical, with a recap summarizing the day's travel experience. Provide as much detail as possible to make the route engaging and informative.`
-                },
+            },
             ],
             model: "llama3-8b-8192", 
             temperature: 0.5, 
