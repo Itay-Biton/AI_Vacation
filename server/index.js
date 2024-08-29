@@ -342,7 +342,6 @@ const mongooseTripSchema = new mongoose.Schema({
 });
 
 const defaultRoute = {
-    _id: "66cf6da9cb27c6009cdfb494",
     defaultRoute: true,
     Country: "Italy",
     travelType: "bike",
