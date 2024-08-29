@@ -159,7 +159,7 @@ async function getImageStatus(imageId) {
         if (response.data.done && response.data.generations[0].img) {
             return response.data.generations[0].img;
         }
-        console.log(response.data.generations[0])
+        console.log(response.data)
         return null;
     } catch (error) {
         console.error('Error checking image status:', error);
