@@ -192,32 +192,38 @@ async function checkImageStatus(imageId) {
 
 async function getRoute(country, travelType) {
     const jsonSchema = JSON.stringify(routeSchema, null, 4);
-    const chatCompletion = await groq.chat.completions.create({
-        messages: [
-        {
-            role: "system",
-            content: `You are a route database that outputs routes in JSON.\n'The JSON object must use the schema: ${jsonSchema}`,
-        },
-        {
-            role: "user",
-            content: `Generate a detailed, three-day consecutive travel route through ${country} using a ${travelType}. The route should adhere to the following constraints:
-1) For bikes: maximum of 80 km per day.
-2) For cars: between 80 km and 300 km per day.
-3) Each day's route must begin where the previous day's route ended.
-Each day's route must include:
-- The total distance in kilometers.
-- Detailed waypoints, including name, position, and whether a trekking path is available.
-- Descriptive information for each waypoint, including 2-3 sentences about points of interest.
-- Information on any available trekking paths.
-Maximize the number of waypoints while respecting the travel constraints. Ensure each day's route is cohesive and logical, with a recap summarizing the day's travel experience. Provide as much detail as possible to make the route engaging and informative.`
+    try {
+        const chatCompletion = await groq.chat.completions.create({
+            messages: [
+            {
+                role: "system",
+                content: `You are a route database that outputs routes in JSON.\n'The JSON object must use the schema: ${jsonSchema}`,
             },
-        ],
-        model: "llama3-8b-8192", 
-        temperature: 0.5, 
-        stream: false,
-        response_format: { type: "json_object" },
-    });
-    return JSON.parse(chatCompletion.choices[0].message.content);
+            {
+                role: "user",
+                content: `Generate a detailed, three-day consecutive travel route through ${country} using a ${travelType}. The route should adhere to the following constraints:
+    1) For bikes: maximum of 80 km per day.
+    2) For cars: between 80 km and 300 km per day.
+    3) Each day's route must begin where the previous day's route ended.
+    Each day's route must include:
+    - The total distance in kilometers.
+    - Detailed waypoints, including name, position, and whether a trekking path is available.
+    - Descriptive information for each waypoint, including 2-3 sentences about points of interest.
+    - Information on any available trekking paths.
+    Maximize the number of waypoints while respecting the travel constraints. Ensure each day's route is cohesive and logical, with a recap summarizing the day's travel experience. Provide as much detail as possible to make the route engaging and informative.`
+                },
+            ],
+            model: "llama3-8b-8192", 
+            temperature: 0.5, 
+            stream: false,
+            response_format: { type: "json_object" },
+        });
+        return JSON.parse(chatCompletion.choices[0].message.content);
+    }
+    catch (err) {
+        console.error("Error generationg trip with Groq:", err);
+        return defaultRoute
+    }
 }
 
 /*
@@ -334,3 +340,108 @@ const mongooseTripSchema = new mongoose.Schema({
     Day2: daySchema,
     Day3: daySchema
 });
+
+const defaultRoute = {
+    _id: "66cf6da9cb27c6009cdfb494",
+    Country: "Italy",
+    travelType: "bike",
+    TotalDistance: 240,
+    Day1: {
+        waypoints: [
+            {
+                name: "Colosseum",
+                hasTrek: false,
+                trekDetails: "",
+                information: "Start your day at the iconic Colosseum, one of Rome's most famous landmarks. Learn about its rich history and architecture before exploring the surrounding streets and cafes.",
+                position: [41.8902, 12.4924]
+            },
+            {
+                name: "Roman Forum",
+                hasTrek: false,
+                trekDetails: "",
+                information: "From the Colosseum, head to the Roman Forum, a sprawling archaeological site filled with ancient ruins and historic landmarks. Take a leisurely stroll and soak up the history.",
+                position: [41.8929, 12.4929]
+            },
+            {
+                name: "Piazza Venezia",
+                hasTrek: false,
+                trekDetails: "",
+                information: "Make your way to Piazza Venezia, a bustling public square surrounded by iconic landmarks like the Victor Emmanuel II Monument and the Basilica of St. Peter.",
+                position: [41.8953, 12.4839]
+            },
+            {
+                name: "Tiber Island",
+                hasTrek: true,
+                trekDetails: "A 1.5 km loop around the island",
+                information: "Cross the Tiber River and explore the charming Tiber Island, known for its beautiful gardens and historic landmarks like the Temple of Aesculapius.",
+                position: [41.8955, 12.4762]
+            }
+        ],
+        dailyDistance: 60,
+        dayRecap: "Today, you explored some of Rome's most iconic landmarks and historical sites. From the Colosseum to the Roman Forum, and from Piazza Venezia to the Tiber Island, you experienced the city's rich history and architecture. Enjoy the evening in Rome's vibrant city center.",
+        _id: "66cf6da9cb27c6009cdfb495"
+    },
+    Day2: {
+        waypoints: [
+            {
+                name: "Piazza del Popolo",
+                hasTrek: false,
+                trekDetails: "",
+                information: "Start your day at Piazza del Popolo, one of Rome's most beautiful and historic squares. Admire the stunning architecture and soak up the lively atmosphere.",
+                position: [41.9004, 12.4864]
+            },
+            {
+                name: "Spanish Steps",
+                hasTrek: false,
+                trekDetails: "",
+                information: "From Piazza del Popolo, head to the Spanish Steps, one of Rome's most famous landmarks and a popular spot for people-watching.",
+                position: [41.9003, 12.4924]
+            },
+            {
+                name: "Villa Borghese",
+                hasTrek: true,
+                trekDetails: "A 2.5 km loop around the park",
+                information: "Explore the beautiful Villa Borghese, a large park filled with gardens, fountains, and stunning architecture. Take a leisurely stroll and enjoy the scenery.",
+                position: [41.9041, 12.4984]
+            },
+            {
+                name: "Trastevere",
+                hasTrek: false,
+                trekDetails: "",
+                information: "End your day in the charming neighborhood of Trastevere, known for its narrow streets, charming piazzas, and lively nightlife. Enjoy dinner at one of the many local restaurants.",
+                position: [41.8953, 12.4839]
+            }
+        ],
+        dailyDistance: 70,
+        dayRecap: "Today, you explored some of Rome's most beautiful and historic neighborhoods. From Piazza del Popolo to the Spanish Steps, and from Villa Borghese to Trastevere, you experienced the city's vibrant atmosphere and stunning architecture. Enjoy the evening in this charming neighborhood.",
+        _id: "66cf6da9cb27c6009cdfb49a"
+    },
+    Day3: {
+        waypoints: [
+            {
+                name: "Catacombs of San Callisto",
+                hasTrek: false,
+                trekDetails: "",
+                information: "Start your day by exploring the Catacombs of San Callisto, a fascinating underground burial site filled with ancient artifacts and historical significance.",
+                position: [41.8403, 12.5463]
+            },
+            {
+                name: "Aventine Hill",
+                hasTrek: true,
+                trekDetails: "A 2.5 km loop around the hill",
+                information: "From the Catacombs, head to Aventine Hill, one of Rome's seven hills and a popular spot for stunning views of the city.",
+                position: [41.8739, 12.4785]
+            },
+            {
+                name: "Testaccio Market",
+                hasTrek: false,
+                trekDetails: "",
+                information: "End your day at the bustling Testaccio Market, where you can sample local cuisine and drinks and experience the city's vibrant food culture.",
+                position: [41.8639, 12.5034]
+            }
+        ],
+        dailyDistance: 60,
+        dayRecap: "Today, you explored some of Rome's most fascinating historical sites and scenic neighborhoods. From the Catacombs of San Callisto to Aventine Hill, and from the market to the city center, you experienced the city's rich history, stunning architecture, and vibrant culture. Enjoy your final evening in Rome.",
+    },
+    __v: 0
+};
