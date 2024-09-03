@@ -20,7 +20,7 @@ function App() {
 
         try {
             // Fetch route data
-            const response = await fetch('https://husky-janna-itay-d1621afb.koyeb.app/generate-route', {
+            const response = await fetch('https://ai-vacation.onrender.com/generate-route', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -36,7 +36,7 @@ function App() {
             setWaypoints3(routeData.Day3.waypoints); 
 
             // Start image generation 
-            const eventSource = new EventSource(`https://husky-janna-itay-d1621afb.koyeb.app/generate-image?country=${encodeURIComponent(country)}&tripId=${encodeURIComponent(routeData.tripId)}`);
+            const eventSource = new EventSource(`https://ai-vacation.onrender.com/generate-image?country=${encodeURIComponent(country)}&tripId=${encodeURIComponent(routeData.tripId)}`);
 
             eventSource.onmessage = (event) => {
                 const data = JSON.parse(event.data);
