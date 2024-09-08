@@ -2,16 +2,7 @@
 # AI_Vacation
 
 AI_Vacation is a web application that generates a 3-day trip plan using AI. Users can enter a desired location and mode of transport (bike or car), and the app provides a complete trip plan including routes, waypoints, a map, and an AI-generated image representing the location. The project consists of a React-based frontend and a Node.js backend using Express and MongoDB.
-
-## Table of Contents
-- [Features](#features)
-- [Purpose](#purpose)
-- [Tech Stack](#tech-stack)
-- [Installation](#installation)
-- [Usage](#usage)
-- [APIs Used](#apis-used)
-- [Contributing](#contributing)
-- [License](#license)
+###[Link to actual site](https://ai-vacation.vercel.app)
 
 ## Features
 - **Location-based trip generation**: Enter a location and the mode of transport (bike/car) to generate a 3-day trip plan.
