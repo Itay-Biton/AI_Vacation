@@ -20,8 +20,8 @@ This project helps travelers plan a 3-day trip to a destination of their choice,
 4. Flexible trip options based on transportation mode (bike or car).
 
 ## Screenshots
-<p align="center"> <img src="./Screenshots/Screenshot1.png" alt="Screenshot 1" width="200"/> </p>
-<p align="center"> <img src="./Screenshots/Screenshot2.png" alt="Screenshot 2" width="200"/> </p>
+<p align="center"> <img src="./Screenshots/Screenshot1.png" alt="Screenshot 1" width="800"/> </p>
+<p align="center"> <img src="./Screenshots/Screenshot2.png" alt="Screenshot 2" width="800"/> </p>
 
 ## Tech Stack
 ### Frontend (Client)
