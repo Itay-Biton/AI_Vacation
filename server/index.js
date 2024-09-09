@@ -5,7 +5,8 @@ const axios = require('axios');
 const Groq = require("groq-sdk");
 const mongoose = require('mongoose');
 
-mongoose.connect(`mongodb+srv://ItayBiton:itay1234@atlascluster.dgff8bz.mongodb.net/AI_Vacation`)
+// make sure to do: export MONGODB_URI=<your-uri>
+mongoose.connect(process.env.MONGODB_URI)
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function () {
